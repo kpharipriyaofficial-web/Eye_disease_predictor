@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
+
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -21,7 +21,7 @@ from app.core.database import (
     database_manager,
 )
 from app.core.logging import configure_logging
-from app.ml.predictor import get_predictor
+
 
 
 def _cors_origins() -> list[str]:
@@ -31,20 +31,13 @@ def _cors_origins() -> list[str]:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Initialize shared database and ML dependencies for this process."""
+    """Initialize shared database connection for this process."""
 
-    # Connect to MongoDB when the application starts.
     await connect_to_mongodb()
 
     try:
-        # Load the ML model in a worker thread so startup does not
-        # block the async event loop.
-        await asyncio.to_thread(get_predictor)
-
         yield
-
     finally:
-        # Close MongoDB connection when the application shuts down.
         await close_mongodb_connection()
 
 
